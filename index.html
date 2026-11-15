@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Billing System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="app-mobile.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Billing">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+</head>
+<body>
+
+  <!-- ===== OVERLAY DE AUTH ===== -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-modal">
+      <div class="auth-brand">
+        <div class="auth-logo">BS</div>
+        <h1 class="auth-title">Billing System</h1>
+      </div>
+
+      <!-- PANEL LOGIN -->
+      <div id="panelLogin" class="auth-panel active">
+        <h2 class="auth-heading">Bienvenido de nuevo</h2>
+        <p class="auth-sub">Inicia sesión para continuar</p>
+        <div class="field-group">
+          <label>Usuario</label>
+          <input id="loginUser" type="text" placeholder="tu_usuario" autocomplete="username">
+        </div>
+        <div class="field-group">
+          <label>Contraseña</label>
+          <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <p id="loginError" class="auth-error"></p>
+        <button class="auth-btn" onclick="iniciarSesion()">Entrar</button>
+        <p class="auth-switch">¿No tienes cuenta? <span onclick="cambiarPanel('registro')">Regístrate</span></p>
+        <p class="auth-switch">¿Olvidaste tu contraseña? <span onclick="abrirModalRecuperar()">Recupérala aquí</span></p>
+      </div>
+
+      <!-- PANEL REGISTRO -->
+      <div id="panelRegistro" class="auth-panel">
+        <h2 class="auth-heading">Crear cuenta</h2>
+        <p class="auth-sub">Completa tus datos para empezar</p>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Nombre</label>
+            <input id="regNombre" type="text" placeholder="Juan">
+          </div>
+          <div class="field-group">
+            <label>Apellido</label>
+            <input id="regApellido" type="text" placeholder="Pérez">
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Nombre de usuario</label>
+          <input id="regUser" type="text" placeholder="juanperez99" autocomplete="username">
+        </div>
+        <div class="field-group">
+          <label>Correo electrónico</label>
+          <input id="regEmail" type="email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="field-group">
+          <label>Empresa</label>
+          <input id="regEmpresa" type="text" placeholder="Mi Tienda S.A.S.">
+        </div>
+        <div class="field-group">
+          <label>Contraseña</label>
+          <input id="regPass" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:0.75rem;">
+          <input type="checkbox" id="aceptaTerminos" style="width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer;">
+          <label for="aceptaTerminos" style="font-size:0.85rem;color:#94a3b8;line-height:1.4;cursor:pointer;">
+            Acepto los <span onclick="abrirTerminos()" style="color:#3b82f6;font-weight:600;text-decoration:underline;cursor:pointer;">Términos y condiciones</span> y las <span onclick="abrirPrivacidad()" style="color:#3b82f6;font-weight:600;text-decoration:underline;cursor:pointer;">Políticas de privacidad</span>
+          </label>
+        </div>
+        <p id="regError" class="auth-error"></p>
+        <p id="regSuccess" class="auth-success"></p>
+        <button class="auth-btn" onclick="registrarUsuario()">Crear cuenta</button>
+        <p class="auth-switch">¿Ya tienes cuenta? <span onclick="cambiarPanel('login')">Inicia sesión</span></p>
+      </div>
+
+      <!-- MODAL TÉRMINOS -->
+      <div id="modalTerminos" class="auth-overlay" onclick="cerrarModalDoc(event,'modalTerminos')">
+        <div class="auth-modal" style="max-width:520px;max-height:80vh;overflow-y:auto;background:#1e293b;">
+          <h2 class="auth-heading" style="margin-bottom:1rem;">Términos y condiciones</h2>
+          <div style="font-size:0.88rem;color:#cbd5e1;line-height:1.7;">
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">1. Uso del servicio</strong><br>Billing System es una herramienta de gestión de ventas e inventario para uso comercial. El usuario se compromete a utilizarla de forma lícita y responsable.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">2. Cuenta de usuario</strong><br>Cada cuenta es personal e intransferible. El usuario es responsable de mantener la confidencialidad de su contraseña y de todas las actividades realizadas bajo su cuenta.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">3. Datos e información</strong><br>El usuario es responsable de la veracidad y exactitud de los datos ingresados al sistema, incluyendo productos, precios, clientes y registros de ventas.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">4. Disponibilidad</strong><br>El servicio se ofrece "tal como está". No garantizamos disponibilidad ininterrumpida y nos reservamos el derecho de realizar mantenimientos o actualizaciones.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">5. Modificaciones</strong><br>Podemos actualizar estos términos en cualquier momento. El uso continuado del servicio implica la aceptación de los términos vigentes.</p>
+            <p><strong style="color:#f1f5f9;">6. Contacto</strong><br>Para cualquier consulta relacionada con estos términos, puedes comunicarte a través de los canales oficiales del servicio.</p>
+          </div>
+          <button class="auth-btn" style="margin-top:1.5rem;" onclick="cerrarDoc('modalTerminos')">Entendido</button>
+        </div>
+      </div>
+
+      <!-- MODAL PRIVACIDAD -->
+      <div id="modalPrivacidad" class="auth-overlay" onclick="cerrarModalDoc(event,'modalPrivacidad')">
+        <div class="auth-modal" style="max-width:520px;max-height:80vh;overflow-y:auto;background:#1e293b;">
+          <h2 class="auth-heading" style="margin-bottom:1rem;">Política de privacidad</h2>
+          <div style="font-size:0.88rem;color:#cbd5e1;line-height:1.7;">
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">1. Datos que recopilamos</strong><br>Recopilamos nombre, apellido, nombre de usuario, correo electrónico y nombre de empresa para crear y gestionar tu cuenta en Billing System.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">2. Uso de los datos</strong><br>Tus datos se utilizan exclusivamente para el funcionamiento del servicio: identificación, recuperación de contraseña y personalización de la experiencia.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">3. Almacenamiento</strong><br>Los datos se almacenan de forma segura en servidores de Supabase. No vendemos ni compartimos tu información personal con terceros.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">4. Datos de ventas</strong><br>Los registros de ventas, inventario y cierres de caja son de tu propiedad. Puedes exportarlos o eliminarlos en cualquier momento desde la aplicación.</p>
+            <p style="margin-bottom:0.8rem;"><strong style="color:#f1f5f9;">5. Cookies y sesión</strong><br>Usamos sessionStorage para mantener tu sesión activa. No utilizamos cookies de rastreo ni publicidad.</p>
+            <p><strong style="color:#f1f5f9;">6. Tus derechos</strong><br>Puedes solicitar la eliminación de tu cuenta y todos tus datos en cualquier momento contactando al administrador del servicio.</p>
+          </div>
+          <button class="auth-btn" style="margin-top:1.5rem;" onclick="cerrarDoc('modalPrivacidad')">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL EDITAR PRODUCTO ===== -->
+  <div id="modalEditar" class="auth-overlay">
+    <div class="auth-modal edit-modal">
+      <h2 class="auth-heading">Editar Producto</h2>
+      <input type="hidden" id="editIndex">
+      <div class="field-group">
+        <label>ID</label>
+        <input id="editId" type="text">
+      </div>
+      <div class="field-group">
+        <label>Nombre</label>
+        <input id="editNombre" type="text">
+      </div>
+      <div class="field-group">
+        <label>Stock</label>
+        <input id="editStock" type="number" inputmode="numeric">
+      </div>
+      <div class="field-group">
+        <label>Precio ($)</label>
+        <input id="editPrecio" inputmode="numeric" oninput="formatearEntrada(this)">
+      </div>
+      <div class="field-group">
+        <label>Precio Mínimo ($) <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+        <input id="editPrecioMin" inputmode="numeric" oninput="formatearEntrada(this)" placeholder="Dejar vacío si no aplica">
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;background:#f1f5f9;padding:10px 14px;border-radius:10px;margin-bottom:1rem;">
+        <input type="checkbox" id="editTieneGarantia" onchange="toggleEditGarantiaDias()" style="width:18px;height:18px;margin:0;cursor:pointer;">
+        <label for="editTieneGarantia" style="font-size:0.9rem;font-weight:600;color:#1e293b;cursor:pointer;margin:0;">🛡️ Tiene garantía</label>
+      </div>
+      <div id="editDiasGarantiaGroup" style="display:none;">
+        <div class="field-group">
+          <label>Días de garantía</label>
+          <input id="editDiasGarantia" type="number" inputmode="numeric" placeholder="ej: 365">
+        </div>
+      </div>
+      <p id="editError" class="auth-error"></p>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="auth-btn" onclick="guardarEdicion()">Guardar</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalEditar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL RECIBO PDF ===== -->
+  <div id="modalRecibo" class="auth-overlay">
+    <div class="auth-modal recibo-modal" id="reciboContenido">
+      <!-- contenido generado por JS -->
+    </div>
+  </div>
+
+  <!-- ===== APP ===== -->
+  <button class="menu-toggle" onclick="toggleSidebar()">☰ Menú</button>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Billing System</h2>
+        <div id="userBadge" class="user-badge" onclick="abrirModalPerfil()" title="Editar perfil" style="cursor:pointer;">✏️</div>
+      </div>
+      <!-- Menú cliente -->
+      <div id="menuCliente">
+        <button onclick="show('ventas'); toggleSidebar()">Ventas</button>
+        <button onclick="show('inventario'); toggleSidebar()">Inventario</button>
+        <button onclick="show('historial'); toggleSidebar()">Historial</button>
+        <button onclick="show('caja'); toggleSidebar()">Caja</button>
+        <button onclick="show('cierres'); toggleSidebar()">Cierres</button>
+        <button onclick="show('garantias'); toggleSidebar()">🛡️ Garantías</button>
+      </div>
+      <!-- Menú admin -->
+      <div id="menuAdmin" style="display:none">
+        <button class="btn-admin" onclick="show('admin'); toggleSidebar()">⚙️ Panel Admin</button>
+      </div>
+      <div id="menuSubUsuario" style="display:none;">
+        <button class="btn-sub" onclick="abrirModalSub()">👥 Sub-usuarios</button>
+      </div>
+      <button class="danger logout-btn" onclick="cerrarSesion()">🚪 Salir</button>
+    </aside>
+
+    <main class="content">
+
+      <!-- VENTAS -->
+      <section id="ventas" class="view active">
+        <div class="panel">
+          <h3>Buscar producto</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <input id="buscar" oninput="buscarProducto()" placeholder="Nombre o ID..." style="flex:1;" autocomplete="off">
+            <button onclick="abrirEscaner('ventas')" title="Escanear código de barras" style="padding:0.5rem 0.65rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="5" y1="7" x2="5" y2="17"/><line x1="19" y1="7" x2="19" y2="17"/><line x1="7" y1="19" x2="17" y2="19"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </button>
+          </div>
+          <div id="resultados"></div>
+        </div>
+
+        <div class="panel" style="padding:0;overflow:hidden;">
+          <div style="padding:16px 16px 0;">
+            <h3 style="margin:0 0 12px;">Carrito</h3>
+            <ul id="carrito"></ul>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 4px 4px;border-top:1px solid #e2e8f0;margin-top:4px;">
+              <span style="font-size:0.9rem;color:#64748b;font-weight:500;">Total</span>
+              <span id="total" style="font-size:1.15rem;font-weight:700;color:#1e293b;">$ 0</span>
+            </div>
+          </div>
+
+          <!-- Selector tipo de pago -->
+          <div id="tipoPagoSelector" style="display:flex;gap:10px;padding:12px 16px;">
+            <button onclick="elegirTipoPago('efectivo')" id="btnTipoEfectivo"
+              style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:2px solid #e2e8f0;border-radius:14px;background:#fff;cursor:pointer;">
+              <span style="font-size:1.6rem;">💵</span>
+              <span style="font-size:0.88rem;font-weight:600;color:#15803d;">Efectivo</span>
+            </button>
+            <button onclick="elegirTipoPago('transferencia')" id="btnTipoTransferencia"
+              style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:2px solid #e2e8f0;border-radius:14px;background:#fff;cursor:pointer;">
+              <span style="font-size:1.6rem;">📲</span>
+              <span style="font-size:0.88rem;font-weight:600;color:#1d4ed8;">Transferencia</span>
+            </button>
+          </div>
+
+          <!-- Panel efectivo -->
+          <div id="panelEfectivo" style="display:none;padding:0 16px 16px;">
+            <input id="pago" inputmode="numeric" oninput="formatearEntrada(this); calcularVueltoEnVivo()" placeholder="Pago recibido ($)" style="margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 4px 10px;">
+              <span style="font-size:0.9rem;color:#64748b;">Vuelto</span>
+              <span id="vueltos" style="font-size:1rem;font-weight:700;color:#2563eb;">$ 0</span>
+            </div>
+            <button onclick="abrirModalMetodoPago_efectivo()" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;">✅ Finalizar venta en efectivo</button>
+            <button onclick="resetTipoPago()" style="width:100%;background:none;border:none;color:#94a3b8;font-size:0.82rem;cursor:pointer;margin-top:6px;">← Cambiar método</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- INVENTARIO -->
+      <section id="inventario" class="view">
+        <div class="panel">
+          <h3>Reabastecer</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <input id="reabastecerID" placeholder="ID del producto" style="flex:1;">
+            <button onclick="abrirEscaner('reabastecer')" title="Escanear ID" style="padding:0.5rem 0.65rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="5" y1="7" x2="5" y2="17"/><line x1="19" y1="7" x2="19" y2="17"/><line x1="7" y1="19" x2="17" y2="19"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </button>
+          </div>
+          <input id="reabastecerCant" type="number" inputmode="numeric" placeholder="Cantidad a sumar">
+          <button onclick="ejecutarReabastecimiento()">Sumar stock</button>
+          <hr>
+          <h3>Agregar producto</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <input id="id" placeholder="ID" style="flex:1;">
+            <button onclick="abrirEscaner('inventario')" title="Escanear ID" style="padding:0.5rem 0.65rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="5" y1="7" x2="5" y2="17"/><line x1="19" y1="7" x2="19" y2="17"/><line x1="7" y1="19" x2="17" y2="19"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </button>
+          </div>
+          <input id="nombre" placeholder="Nombre">
+          <input id="stock" type="number" inputmode="numeric" placeholder="Stock inicial">
+          <input id="precio" inputmode="numeric" oninput="formatearEntrada(this)" placeholder="Precio ($)">
+          <input id="precioMin" inputmode="numeric" oninput="formatearEntrada(this)" placeholder="Precio mínimo ($) — opcional">
+          <div style="display:flex;align-items:center;gap:0.75rem;background:#f1f5f9;padding:10px 14px;border-radius:10px;margin-bottom:1rem;">
+            <input type="checkbox" id="tieneGarantia" onchange="toggleGarantiaDias()" style="width:18px;height:18px;margin:0;cursor:pointer;">
+            <label for="tieneGarantia" style="font-size:0.9rem;font-weight:600;color:#1e293b;cursor:pointer;margin:0;">🛡️ Este producto tiene garantía</label>
+          </div>
+          <div id="diasGarantiaGroup" style="display:none;">
+            <input id="diasGarantia" type="number" inputmode="numeric" placeholder="Días de garantía (ej: 365)">
+          </div>
+          <button onclick="agregarProducto()">Guardar producto</button>
+        </div>
+        <div class="panel">
+          <h3>Exportar inventario</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+            <button onclick="exportarInventarioPDF('todos')" style="background:#2563eb;color:white;padding:8px 16px;border-radius:8px;">📄 Todo el inventario</button>
+            <button onclick="exportarInventarioPDF('bajo')" style="background:#f59e0b;color:white;padding:8px 16px;border-radius:8px;">⚠️ Stock bajo (≤3)</button>
+            <button onclick="exportarInventarioPDF('agotado')" style="background:#ef4444;color:white;padding:8px 16px;border-radius:8px;">🚨 Agotados</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Importar inventario</h3>
+          <p style="font-size:0.85rem;color:#64748b;margin-bottom:0.75rem;">Carga masiva desde Excel (.xlsx) o CSV. Columnas recomendadas: ID, Nombre, Stock, Precio, Precio Mínimo.</p>
+          <button onclick="abrirImportarInventario()" style="background:#0f766e;color:white;padding:8px 16px;border-radius:8px;">⬆️ Importar desde Excel / CSV</button>
+        </div>
+        <div class="panel">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <h3 style="margin:0;flex:1;">Productos</h3>
+            <span id="invContador" style="font-size:0.8rem;color:#94a3b8;"></span>
+          </div>
+          <div style="position:relative;margin-bottom:14px;">
+            <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="buscarInventario" placeholder="Buscar producto..." oninput="filtrarInventario()"
+              style="width:100%;padding:9px 10px 9px 34px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.88rem;box-sizing:border-box;background:#f8fafc;">
+          </div>
+          <div id="tablaInventario" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <div id="invShowMore" style="display:none;padding-top:8px;">
+            <button onclick="mostrarMasInventario()" style="width:100%;padding:10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:0.85rem;color:#475569;font-weight:500;">Ver más productos ↓</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORIAL -->
+      <section id="historial" class="view">
+        <div class="panel">
+          <h3>Historial de ventas</h3>
+          <input type="date" id="fechaFiltro" onchange="filtrarHistorial()">
+          <input id="busquedaHistorial" oninput="filtrarHistorial()" placeholder="Buscar por nombre...">
+          <div id="listaHistorial"></div>
+        </div>
+      </section>
+
+      <!-- CAJA -->
+      <section id="caja" class="view">
+        <div class="panel">
+          <h2 id="displaySaldo">$ 0</h2>
+          <h3 id="displayRetiros">$ 0</h3>
+          <input id="baseCaja" inputmode="numeric" oninput="formatearEntrada(this)" placeholder="Base ($)">
+          <button id="btnGuardarBase" onclick="guardarBase()">Fijar</button>
+          <hr>
+          <input id="montoRetiro" inputmode="numeric" oninput="formatearEntrada(this)" placeholder="Retiro ($)">
+          <button onclick="retirar()">Retirar</button>
+          <button class="danger" onclick="cerrarCaja()">Cerrar Turno</button>
+        </div>
+      </section>
+
+      <!-- CIERRES -->
+      <section id="cierres" class="view">
+        <div class="panel"><h3>Cierres de turno</h3><div id="listaCierres"></div></div>
+      </section>
+
+      <!-- GARANTÍAS -->
+      <section id="garantias" class="view">
+        <div class="panel">
+          <h3>Buscar Garantía</h3>
+          <p style="color:#64748b;font-size:0.9rem;">Ingresa la identificación del cliente o el código único de garantía.</p>
+          <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+            <input id="buscarGarantia" placeholder="Identificación o código de garantía..." style="margin:0;flex:1;" oninput="if(!this.value.trim()){document.getElementById('resultadoGarantia').innerHTML=''}">
+            <button onclick="buscarGarantias()" style="background:#2563eb;color:white;white-space:nowrap;">Buscar</button>
+          </div>
+          <div id="resultadoGarantia"></div>
+        </div>
+        <div class="panel">
+          <h3>Garantías registradas</h3>
+          <div id="listaGarantias"></div>
+        </div>
+      </section>
+
+      <!-- ADMIN -->
+      <section id="admin" class="view">
+        <div class="panel">
+          <h3>Panel de Administración</h3>
+          <p style="color:#64748b;font-size:0.9rem;">Gestiona los usuarios registrados en el sistema.</p>
+          <div id="tablaAdmin"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- AREA DE IMPRESION OCULTA -->
+  <div id="printArea" style="display:none;"></div>
+
+
+  <!-- ===== MODAL CIERRE DE CAJA ===== -->
+  <div id="modalCierreCaja" class="auth-overlay">
+    <div class="auth-modal" style="max-width:380px;">
+      <h2 class="auth-heading">Cerrar Turno</h2>
+      <p class="auth-sub">Ingresa el dinero físico contado en caja para validar el cierre.</p>
+      <div class="field-group">
+        <label>Dinero físico en caja ($)</label>
+        <input id="inputEfectivoReal" inputmode="numeric" oninput="formatearEntrada(this)" placeholder="0">
+      </div>
+      <p id="cierreError" class="auth-error"></p>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="auth-btn" onclick="confirmarCierreCaja()">Confirmar cierre</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalCierre()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL: Importar inventario -->
+  <div id="modalImportarInv" class="auth-overlay" style="z-index:9995;">
+    <div class="auth-modal" style="max-width:440px;">
+      <h2 class="auth-heading">Importar inventario</h2>
+      <p style="font-size:0.85rem;color:#475569;margin-bottom:1rem;">Sube un archivo <strong>Excel (.xlsx)</strong> o <strong>CSV</strong>.<br>Columnas: ID, Nombre, Stock, Precio, Precio Mínimo<br><span style="color:#94a3b8;font-size:0.8rem;">(Solo Nombre y Precio son obligatorios. Los demás son opcionales.)</span></p>
+      <input id="importarFileInput" type="file" accept=".xlsx,.xls,.csv" onchange="importarArchivoSeleccionado(this)" style="margin-bottom:4px;">
+      <div id="importarResultado" style="margin-top:12px;"></div>
+      <button class="auth-btn" style="background:#475569;margin-top:1rem;width:100%;" onclick="cerrarImportarInventario()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalle de ventas de un cierre -->
+  <div id="modalDetalleCierre" class="auth-overlay" style="z-index:9994;">
+    <div class="auth-modal" style="max-width:460px;max-height:85vh;display:flex;flex-direction:column;">
+      <h2 class="auth-heading" id="detalleCiereTitle">Detalle del turno</h2>
+      <div id="detalleCierreContenido" style="overflow-y:auto;flex:1;padding-right:4px;"></div>
+      <button class="auth-btn" style="background:#334155;margin-top:1rem;" onclick="cerrarDetalleCierre()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL CREAR SUB-USUARIO ===== -->
+  <div id="modalSubUsuario" class="auth-overlay">
+    <div class="auth-modal" style="max-width:380px;">
+      <h2 class="auth-heading" id="subModalTitle">Crear Sub-usuario</h2>
+      <p class="auth-sub">Este usuario trabajará dentro de tu negocio con sus propios datos.</p>
+      <div style="display:flex;align-items:center;gap:0.75rem;background:#f1f5f9;padding:10px 14px;border-radius:10px;margin-bottom:1rem;">
+        <input type="checkbox" id="chkCompartirInv" onchange="toggleCompartirInventario()" style="width:18px;height:18px;margin:0;cursor:pointer;">
+        <label for="chkCompartirInv" style="font-size:0.9rem;font-weight:600;color:#1e293b;cursor:pointer;margin:0;">📦 Compartir mi inventario con los sub-usuarios</label>
+      </div>
+      <div class="field-group">
+        <label>Nombre</label>
+        <input id="subNombre" type="text" placeholder="Nombre del empleado">
+      </div>
+      <div class="field-group">
+        <label>Usuario</label>
+        <input id="subUser" type="text" placeholder="usuario_cajero">
+      </div>
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input id="subPass" type="password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <p id="subError" class="auth-error"></p>
+      <p id="subSuccess" class="auth-success"></p>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="auth-btn" onclick="crearSubUsuario()">Crear</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalSub()">Cancelar</button>
+      </div>
+      <div id="listaSubUsuarios" style="margin-top:1.2rem;"></div>
+    </div>
+  </div>
+
+
+  <!-- ===== MODAL EDITAR PERFIL ===== -->
+  <div id="modalPerfil" class="auth-overlay">
+    <div class="auth-modal" style="max-width:420px;">
+      <h2 class="auth-heading" id="perfilTitulo">Editar perfil</h2>
+      <div class="field-group">
+        <label>Nombre de usuario</label>
+        <input id="perfilUser" type="text" placeholder="usuario123">
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Nombre</label>
+          <input id="perfilNombre" type="text">
+        </div>
+        <div class="field-group">
+          <label>Apellido</label>
+          <input id="perfilApellido" type="text">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Correo electrónico</label>
+        <input id="perfilEmail" type="email" placeholder="correo@ejemplo.com">
+      </div>
+      <div class="field-group" id="perfilEmpresaGroup">
+        <label>Empresa</label>
+        <input id="perfilEmpresa" type="text">
+      </div>
+      <div class="field-group">
+        <label>Nueva contraseña <span style="color:#94a3b8;font-weight:400;">(dejar vacío para no cambiar)</span></label>
+        <input id="perfilPass" type="password" placeholder="••••••••">
+      </div>
+      <div class="field-group" id="perfilWompiGroup" style="display:none;">
+        <label style="display:flex;align-items:center;gap:6px;">
+          <svg style="width:16px;height:16px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Llave privada Wompi
+          <span style="color:#94a3b8;font-weight:400;font-size:0.78rem;">(opcional — pagos en línea)</span>
+        </label>
+        <input id="perfilWompiKey" type="password" placeholder="prv_prod_..." autocomplete="off">
+        <p style="font-size:0.75rem;color:#94a3b8;margin-top:4px;">
+          Consíguela en <a href="https://comercios.wompi.co" target="_blank" style="color:#7c3aed;">comercios.wompi.co</a> → Desarrolladores → Llaves de API
+        </p>
+      </div>
+      <!-- Botón de métodos de pago — solo para dueños, se muestra desde JS -->
+      <div id="perfilMetodosGroup" style="display:none;margin-bottom:0.8rem;">
+        <button class="auth-btn" style="width:100%;background:#0f766e;font-size:0.9rem;" onclick="cerrarModalPerfil();abrirConfigMetodosPago()">
+          💳 Configurar métodos de pago (Nequi, Daviplata…)
+        </button>
+      </div>
+      <!-- Configuración de impresora -->
+      <div style="margin-bottom:0.8rem;">
+      </div>
+      <p id="perfilError" class="auth-error"></p>
+      <p id="perfilSuccess" class="auth-success"></p>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="auth-btn" onclick="guardarPerfil()">Guardar</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalPerfil()">Cancelar</button>
+      </div>
+      <hr style="margin:1.2rem 0 1rem;border-color:#f1f5f9;">
+      <button onclick="confirmarEliminarCuenta()" style="width:100%;background:none;border:1.5px solid #ef4444;color:#ef4444;border-radius:8px;padding:8px 0;font-size:0.85rem;cursor:pointer;">
+        🗑️ Eliminar mi cuenta permanentemente
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL ELIMINAR CUENTA ===== -->
+  <div id="modalEliminarCuenta" class="auth-overlay" style="z-index:9998;">
+    <div class="auth-modal" style="max-width:380px;">
+      <h2 class="auth-heading" style="color:#ef4444;">⚠️ Eliminar cuenta</h2>
+      <p style="font-size:0.9rem;color:#334155;margin-bottom:0.5rem;">Esta acción es <strong>permanente e irreversible</strong>. Se eliminarán:</p>
+      <ul style="font-size:0.85rem;color:#475569;margin:0 0 1rem 1.2rem;line-height:1.8;">
+        <li>Tu cuenta y todos tus datos</li>
+        <li>Tu inventario completo</li>
+        <li>Tus sub-usuarios y sus datos</li>
+        <li>Historial de ventas, cierres y garantías</li>
+      </ul>
+      <p style="font-size:0.88rem;color:#1e293b;margin-bottom:6px;">Escribe <strong>ELIMINAR</strong> para confirmar:</p>
+      <input id="eliminarCuentaConfirm" type="text" placeholder="ELIMINAR" style="margin-bottom:8px;border:1.5px solid #ef4444;">
+      <p id="eliminarCuentaError" style="color:#ef4444;font-size:0.82rem;min-height:18px;margin-bottom:8px;"></p>
+      <div style="display:flex;gap:0.75rem;">
+        <button class="auth-btn" style="background:#ef4444;" onclick="ejecutarEliminarCuenta()">Eliminar para siempre</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarEliminarCuenta()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== MODAL EDITAR SUB (del dueño) ===== -->
+  <div id="modalEditSub" class="auth-overlay">
+    <div class="auth-modal" style="max-width:400px;">
+      <h2 class="auth-heading">Editar Sub-usuario</h2>
+      <input type="hidden" id="editSubId">
+      <div class="field-group">
+        <label>Nombre de usuario</label>
+        <input id="editSubUser" type="text">
+      </div>
+      <div class="field-group">
+        <label>Nombre</label>
+        <input id="editSubNombre" type="text">
+      </div>
+      <div class="field-group">
+        <label>Nueva contraseña <span style="color:#94a3b8;font-weight:400;">(dejar vacío para no cambiar)</span></label>
+        <input id="editSubPass" type="password" placeholder="••••••••">
+      </div>
+      <p id="editSubError" class="auth-error"></p>
+      <p id="editSubSuccess" class="auth-success"></p>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="auth-btn" onclick="guardarEditSub()">Guardar</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalEditSub()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== MODAL DATOS GARANTÍA ===== -->
+  <div id="modalGarantia" class="auth-overlay">
+    <div class="auth-modal" style="max-width:400px;">
+      <h2 class="auth-heading">🛡️ Datos para Garantía</h2>
+      <p class="auth-sub">Uno o más productos tienen garantía. Ingresa los datos del comprador.</p>
+      <div class="field-group">
+        <label>Nombre completo del comprador</label>
+        <input id="garantiaNombre" type="text" placeholder="Juan Pérez">
+      </div>
+      <div class="field-group">
+        <label>Identificación</label>
+        <input id="garantiaId" type="text" placeholder="123456789">
+      </div>
+      <p id="garantiaError" class="auth-error"></p>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="auth-btn" onclick="confirmarGarantiaYVenta()">Confirmar y finalizar venta</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalGarantia()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== MODAL RECLAMACIÓN GARANTÍA ===== -->
+  <div id="modalReclamacion" class="auth-overlay">
+    <div class="auth-modal" style="max-width:440px;">
+      <h2 class="auth-heading">🛡️ Reclamar Garantía</h2>
+      <input type="hidden" id="reclamacionGarantiaId">
+      <div id="reclamacionInfoProducto" style="background:#f1f5f9;border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:0.88rem;color:#475569;"></div>
+      <div class="field-group">
+        <label>Motivo de la reclamación</label>
+        <select id="reclamacionMotivo" onchange="toggleReclamacionOtro()" style="padding:0.9rem;border:1px solid #e2e8f0;border-radius:8px;width:100%;box-sizing:border-box;margin-bottom:1rem;font-family:inherit;font-size:0.95rem;background:white;">
+          <option value="">-- Selecciona un motivo --</option>
+          <option value="Defecto de fábrica">Defecto de fábrica</option>
+          <option value="Falla de hardware">Falla de hardware</option>
+          <option value="Falla de software">Falla de software</option>
+          <option value="Pantalla dañada">Pantalla dañada</option>
+          <option value="No enciende">No enciende</option>
+          <option value="Batería defectuosa">Batería defectuosa</option>
+          <option value="Problema de conectividad">Problema de conectividad</option>
+          <option value="Pieza incompleta">Pieza incompleta</option>
+          <option value="Otro">Otro (describir)</option>
+        </select>
+      </div>
+      <div class="field-group" id="reclamacionOtroGroup" style="display:none;">
+        <label>Describe el motivo</label>
+        <input id="reclamacionOtro" type="text" placeholder="Describe el problema...">
+      </div>
+      <div class="field-group">
+        <label>Observaciones adicionales <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+        <textarea id="reclamacionObs" placeholder="Detalles adicionales, estado del producto, acuerdos..." style="width:100%;box-sizing:border-box;padding:0.9rem;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.95rem;resize:vertical;min-height:80px;"></textarea>
+      </div>
+      <p id="reclamacionError" class="auth-error"></p>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="auth-btn" onclick="confirmarReclamacion()">Registrar reclamación</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalReclamacion()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== MODAL VENTA EXITOSA ===== -->
+  <div id="modalVentaExitosa" class="auth-overlay">
+    <div class="auth-modal" style="max-width:380px;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:0.5rem;">✅</div>
+      <h2 class="auth-heading" style="text-align:center;">¡Venta registrada!</h2>
+      <p class="auth-sub" style="text-align:center;">¿Deseas imprimir el recibo de esta venta?</p>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button class="auth-btn" onclick="imprimirDesdeVenta()">🖨️ Imprimir recibo</button>
+        <button class="auth-btn" style="background:#334155;" onclick="cerrarModalVentaExitosa()">No, gracias</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== MODAL RECUPERAR CONTRASEÑA ===== -->
+  <div id="modalRecuperar" class="auth-overlay">
+    <div class="auth-modal">
+      <div class="auth-brand">
+        <div class="auth-logo">BS</div>
+        <h1 class="auth-title">Billing System</h1>
+      </div>
+      <h2 class="auth-heading">Recuperar contraseña</h2>
+      <p class="auth-sub">Ingresa tu usuario y correo registrado. Te enviaremos una contraseña temporal.</p>
+      <div class="field-group">
+        <label>Nombre de usuario</label>
+        <input id="recupUser" type="text" placeholder="tu_usuario">
+      </div>
+      <div class="field-group">
+        <label>Correo electrónico</label>
+        <input id="recupEmail" type="email" placeholder="correo@ejemplo.com">
+      </div>
+      <p id="recupError" class="auth-error"></p>
+      <p id="recupSuccess" class="auth-success"></p>
+      <button class="auth-btn" onclick="enviarRecuperacion()">Enviar contraseña temporal</button>
+      <p class="auth-switch" style="margin-top:1rem;">
+        <span onclick="cerrarModalRecuperar()">← Volver al login</span>
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init("TcAYyUBB0CBFxovR5");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- MODAL ESCÁNER DE CÁMARA — global, fuera de todas las secciones -->
+  <div id="modalEscaner" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;">
+    <div style="background:#1e293b;border-radius:14px;padding:1.25rem;width:min(94vw,360px);box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <span id="escanerTitulo" style="color:#f1f5f9;font-weight:700;font-size:1rem;">📷 Escanear código</span>
+        <button onclick="cerrarEscaner()" style="background:transparent;border:none;color:#94a3b8;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <!-- Visor de cámara -->
+      <div style="position:relative;width:100%;aspect-ratio:1/1;background:#000;border-radius:10px;overflow:hidden;">
+        <video id="escanerVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>
+        <!-- Marco de escaneo -->
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+          <div style="position:relative;width:62%;height:62%;border:3px solid #3b82f6;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);">
+            <div style="position:absolute;top:0;left:0;width:18px;height:18px;border-top:4px solid #60a5fa;border-left:4px solid #60a5fa;border-radius:4px 0 0 0;"></div>
+            <div style="position:absolute;top:0;right:0;width:18px;height:18px;border-top:4px solid #60a5fa;border-right:4px solid #60a5fa;border-radius:0 4px 0 0;"></div>
+            <div style="position:absolute;bottom:0;left:0;width:18px;height:18px;border-bottom:4px solid #60a5fa;border-left:4px solid #60a5fa;border-radius:0 0 0 4px;"></div>
+            <div style="position:absolute;bottom:0;right:0;width:18px;height:18px;border-bottom:4px solid #60a5fa;border-right:4px solid #60a5fa;border-radius:0 0 4px 0;"></div>
+            <div id="escanerLinea" style="position:absolute;top:0;left:4px;right:4px;height:3px;background:linear-gradient(90deg,transparent,#3b82f6,transparent);border-radius:2px;animation:escanerScan 1.8s ease-in-out infinite;"></div>
+          </div>
+        </div>
+      </div>
+      <p id="escanerEstado" style="color:#94a3b8;font-size:0.82rem;text-align:center;margin-top:0.75rem;">Apunta al código de barras</p>
+      <canvas id="escanerCanvas" style="display:none;"></canvas>
+    </div>
+  </div>
+
+  <!-- MODAL: Método de pago -->
+  <div id="modalMetodoPago" class="auth-overlay" style="z-index:9990;">
+    <div class="auth-modal" style="max-width:380px;text-align:center;">
+      <h2 class="auth-heading">¿Cómo paga el cliente?</h2>
+      <p style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.95rem;">
+        Total: <strong id="metodoPagoTotal">$ 0</strong>
+      </p>
+      <!-- Métodos personalizados (Nequi, Daviplata, etc.) inyectados por JS -->
+      <div id="botonesMetodosPersonalizados" style="display:none;margin-bottom:8px;text-align:left;"></div>
+      <div style="display:flex;flex-direction:column;gap:0.7rem;">
+        <button class="auth-btn" style="display:flex;align-items:center;gap:10px;font-size:1rem;padding:0.9rem;" onclick="seleccionarMetodoPago('efectivo')">
+          <span style="font-size:1.4rem;">💵</span><span>Efectivo</span>
+        </button>
+        <button id="btnMetodoWompi" class="auth-btn" style="display:none;align-items:center;gap:10px;font-size:1rem;padding:0.9rem;background:#7c3aed;" onclick="seleccionarMetodoPago('wompi')">
+          <span style="font-size:1.4rem;">📲</span><span>Wompi (PSE / Tarjeta)</span>
+        </button>
+        <button class="auth-btn" style="background:#475569;margin-top:0.4rem;" onclick="cerrarModalMetodoPago()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalle de método de pago personalizado -->
+  <div id="modalDetalleMetodoPago" class="auth-overlay" style="z-index:9992;">
+    <div class="auth-modal" style="max-width:360px;text-align:center;">
+      <h2 class="auth-heading" id="dmpNombre">Nequi</h2>
+      <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem;">
+        Total a cobrar: <strong id="dmpTotal">$ 0</strong>
+      </p>
+      <div id="dmpQR" style="display:none;margin:0 auto 1rem;"></div>
+      <div style="background:#f8fafc;border-radius:10px;padding:14px;text-align:left;margin-bottom:1.2rem;">
+        <div style="margin-bottom:8px;font-size:0.9rem;"><span style="color:#64748b;">Titular:</span> <strong id="dmpTitular">—</strong></div>
+        <div style="margin-bottom:8px;font-size:0.9rem;"><span style="color:#64748b;">Número:</span> <strong id="dmpNumero">—</strong></div>
+        <div style="font-size:0.9rem;"><span style="color:#64748b;">Clave / Brev:</span> <strong id="dmpClave">—</strong></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.7rem;">
+        <button class="auth-btn" style="background:#16a34a;" onclick="confirmarPagoMetodo()">✅ Cliente ya pagó — Registrar venta</button>
+        <button class="auth-btn" style="background:#475569;" onclick="cerrarDetalleMetodoPago()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Configurar métodos de pago -->
+  <div id="modalConfigMetodosPago" class="auth-overlay" style="z-index:9993;">
+    <div class="auth-modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
+      <h2 class="auth-heading">Métodos de pago</h2>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Agrega tus cuentas para que los clientes te paguen.</p>
+
+      <!-- Lista de métodos guardados -->
+      <div id="listaMetodosPago" style="margin-bottom:1.4rem;"></div>
+
+      <!-- Formulario para agregar -->
+      <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+        <h3 style="font-size:0.95rem;font-weight:600;margin:0 0 12px;">Agregar método</h3>
+
+        <!-- Selector de tipo -->
+        <div class="field-group" style="margin-bottom:10px;">
+          <label style="font-size:0.82rem;font-weight:500;color:#374151;">Tipo</label>
+          <select id="mpTipo" onchange="mpTipoChanged()" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+            <option value="">— Selecciona —</option>
+            <option value="nequi">Nequi (personal)</option>
+            <option value="nequi_comercio">Nequi Comercio</option>
+            <option value="daviplata">Daviplata</option>
+            <option value="bancolombia_ahorro">Bancolombia — Cuenta de Ahorro</option>
+            <option value="bancolombia_corriente">Bancolombia — Cuenta Corriente</option>
+            <option value="wompi_qr">Wompi (QR)</option>
+            <option value="otro">💳 Otro</option>
+          </select>
+        </div>
+
+        <!-- Nota PSE -->
+        <div id="mpNotaPSE" style="display:none;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:0.82rem;color:#92400e;">
+          ℹ️ <b>PSE no es configurable manualmente.</b> PSE es una pasarela bancaria que requiere integración técnica con empresa legalmente constituida. Si tienes Wompi configurado, PSE ya está disponible automáticamente desde allí.
+        </div>
+
+        <!-- Nombre comercial — siempre visible excepto bancolombia que lo llena solo -->
+        <div id="mpNombreComercialGroup" class="field-group" style="margin-bottom:10px;display:none;">
+          <label id="mpNombreComercialLabel" style="font-size:0.82rem;font-weight:500;color:#374151;">Nombre que verá el cliente</label>
+          <input id="mpNombreComercial" type="text" placeholder="Ej: Nequi Tienda Rodrigo" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;box-sizing:border-box;">
+        </div>
+
+        <!-- Titular — Nequi personal, Daviplata, Bancolombia -->
+        <div id="mpTitularGroup" class="field-group" style="margin-bottom:10px;display:none;">
+          <label id="mpTitularLabel" style="font-size:0.82rem;font-weight:500;color:#374151;">Nombre del titular</label>
+          <input id="mpNombreTitular" type="text" placeholder="Nombre como aparece en la cuenta" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;box-sizing:border-box;">
+        </div>
+
+        <!-- NIT — Nequi Comercio -->
+        <div id="mpNITGroup" class="field-group" style="margin-bottom:10px;display:none;">
+          <label style="font-size:0.82rem;font-weight:500;color:#374151;">NIT del comercio</label>
+          <input id="mpNIT" type="text" inputmode="numeric" placeholder="900123456-7" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;box-sizing:border-box;">
+        </div>
+
+        <!-- Número celular — Nequi, Daviplata -->
+        <div id="mpCelularGroup" class="field-group" style="margin-bottom:10px;display:none;">
+          <label style="font-size:0.82rem;font-weight:500;color:#374151;">Número de celular</label>
+          <input id="mpNumero" type="text" inputmode="numeric" placeholder="3001234567" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;box-sizing:border-box;">
+        </div>
+
+        <!-- Número de cuenta — Bancolombia -->
+        <div id="mpCuentaGroup" class="field-group" style="margin-bottom:10px;display:none;">
+          <label style="font-size:0.82rem;font-weight:500;color:#374151;">Número de cuenta</label>
+          <input id="mpNumeroCuenta" type="text" inputmode="numeric" placeholder="Ej: 23456789-55" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;box-sizing:border-box;">
+          <p style="font-size:0.76rem;color:#94a3b8;margin-top:3px;">Escríbela tal como aparece en tu extracto o app</p>
+        </div>
+
+        <!-- Clave brev — Nequi personal, Daviplata -->
+        <div id="mpClaveGroup" class="field-group" style="margin-bottom:10px;display:none;">
+          <label style="font-size:0.82rem;font-weight:500;color:#374151;">Clave Breve (opcional)</label>
+          <input id="mpClave" type="text" inputmode="numeric" placeholder="4–6 dígitos si aplica" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;box-sizing:border-box;">
+        </div>
+
+        <!-- QR — todos excepto PSE -->
+        <div id="mpQRGroup" class="field-group" style="margin-bottom:14px;display:none;">
+          <label id="mpQRLabel" style="font-size:0.82rem;font-weight:500;color:#374151;">Código QR (imagen)</label>
+          <input id="mpQRInput" type="file" accept="image/*" onchange="mpQRSeleccionado(this)" style="font-size:0.82rem;">
+          <div id="mpQRPreview" style="margin-top:8px;"></div>
+        </div>
+
+        <button id="mpBtnAgregar" class="auth-btn" style="width:100%;background:#2563eb;display:none;" onclick="guardarMetodoPago()">➕ Agregar método</button>
+      </div>
+
+      <button class="auth-btn" style="background:#475569;margin-top:1rem;width:100%;" onclick="cerrarConfigMetodosPago()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Link de pago Wompi generado -->
+  <div id="modalWompiLink" class="auth-overlay" style="z-index:9991;">
+    <div class="auth-modal" style="max-width:400px;text-align:center;">
+      <h2 class="auth-heading">Link de pago generado</h2>
+      <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:0.6rem;">Comparte este link con el cliente:</p>
+      <div style="display:flex;align-items:center;gap:8px;background:#f1f5f9;padding:10px 12px;border-radius:8px;margin-bottom:1.2rem;">
+        <a id="wompiLinkURL" href="#" target="_blank"
+           style="flex:1;word-break:break-all;font-size:0.82rem;color:#2563eb;text-decoration:underline;text-align:left;">
+          —
+        </a>
+        <button onclick="copiarLinkWompi()" id="btnCopiarWompi"
+          style="flex-shrink:0;background:#475569;color:white;border:none;border-radius:6px;padding:6px 10px;font-size:0.8rem;cursor:pointer;white-space:nowrap;">
+          📋 Copiar
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.7rem;">
+        <button class="auth-btn" style="background:#2563eb;" onclick="abrirWompiLink()">
+          🔗 Abrir link de pago
+        </button>
+        <button class="auth-btn" style="background:#16a34a;" onclick="wompiPagoConfirmado()">
+          ✅ Cliente ya pagó — Registrar venta
+        </button>
+        <button class="auth-btn" style="background:#475569;" onclick="cerrarModalWompiLink()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script src="script.js"></script>
+  <script src="app-mobile.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(console.error));
+    }
+  </script>
+</body>
+</html>

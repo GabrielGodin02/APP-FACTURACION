@@ -1,0 +1,2 @@
+{ "appId": "co.billingsystem.app", "appName": "Billing System", "webDir": "www",
+  "android": { "allowMixedContent": false } }
